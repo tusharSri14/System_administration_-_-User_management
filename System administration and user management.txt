@@ -1,0 +1,77 @@
+#!/bin/bash
+# ===============================================
+# Linux User & Group Management Script
+# Author: Tushar Srivastava
+# Project: System Administration & User Management
+# ===============================================
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+  echo "❌ Please run as root (sudo)."
+  exit 1
+fi
+
+# Main menu
+while true; do
+    clear
+    echo "======================================="
+    echo "   Linux User & Group Management Tool   "
+    echo "======================================="
+    echo "1. Add User"
+    echo "2. Delete User"
+    echo "3. Add Group"
+    echo "4. Delete Group"
+    echo "5. Password Expiry Check"
+    echo "6. Login Attempts Monitoring"
+    echo "7. Exit"
+    echo "======================================="
+    read -p "Choose an option [1-7]: " choice
+
+    case $choice in
+1)
+            read -p "Enter username to add: " username
+            read -p "Enter default shell (/bin/bash): " shell
+            shell=${shell:-/bin/bash}
+            useradd -m -s "$shell" "$username"
+            passwd "$username"
+            echo "✅ User '$username' added successfully."
+            read -p "Press Enter to continue..."
+            ;;
+        2)
+            read -p "Enter username to delete: " username
+            userdel -r "$username"
+            echo "✅ User '$username' deleted successfully."
+            read -p "Press Enter to continue..."
+            ;;
+        3)
+            read -p "Enter group name to add: " groupname
+            groupadd "$groupname"
+            echo "✅ Group '$groupname' added successfully."
+            read -p "Press Enter to continue..."
+            ;;
+        4)
+            read -p "Enter group name to delete: " groupname
+            groupdel "$groupname"
+            echo "✅ Group '$groupname' deleted successfully."
+read -p "Press Enter to continue..."
+            ;;
+        5)
+            read -p "Enter username to check password expiry: " username
+            chage -l "$username"
+            read -p "Press Enter to continue..."
+            ;;
+        6)
+            echo "🔎 Failed login attempts (last 10):"
+            tail -n 10 /var/log/auth.log | grep "Failed password"
+            read -p "Press Enter to continue..."
+            ;;
+        7)
+            echo "👋 Exiting... Goodbye!"
+            exit 0
+            ;;
+        *)
+            echo "❌ Invalid choice, try again."
+            sleep 1
+            ;;
+    esac
+done
